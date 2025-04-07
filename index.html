@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Moon - AI Chatbot</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      background: linear-gradient(270deg, #b2ebf2, #e0f7fa, #ffffff, #c5cae9, #b3e5fc, #e1f5fe);
+      background-size: 1200% 1200%;
+      animation: gradientFade 20s ease infinite;
+      font-family: 'Poppins', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding-top: 2vh;
+      box-sizing: border-box;
+      cursor: none;
+    }
+
+    @keyframes gradientFade {
+      0% { background-position: 0% 50%; }
+      25% { background-position: 50% 100%; }
+      50% { background-position: 100% 50%; }
+      75% { background-position: 50% 0%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    #chatbox {
+      width: 100%;
+      max-width: 900px;
+      height: calc(95vh - 1cm);
+      padding: 20px;
+      background-color: rgba(240, 248, 255, 0.15);
+      border-radius: 20px;
+      box-shadow: 0 0 30px rgba(173, 216, 230, 0.4);
+      display: none;
+      flex-direction: column;
+      backdrop-filter: blur(15px);
+      border: 1px solid rgba(173, 216, 230, 0.3);
+      margin-bottom: 1cm;
+      opacity: 0;
+      transition: opacity 1s ease;
+    }
+
+    #title {
+      text-align: center;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 36px;
+      color: #00acc1;
+      position: relative;
+      overflow: hidden;
+      display: inline-block;
+      margin-bottom: 20px;
+    }
+
+    #title::before {
+      content: 'MoonBiplov';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(120deg, transparent 0%, #ffffff 50%, transparent 100%);
+      background-size: 200% 100%;
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      animation: shine 5s linear infinite; /* slower shine */
+    }
+
+    @keyframes shine {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+
+    #chatlog {
+      flex: 1;
+      overflow-y: auto;
+      border-radius: 12px;
+      padding: 10px;
+      background: rgba(255, 255, 255, 0.12);
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      border-radius: 10px;
+    }
+
+    #loader {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 100%;
+      background: linear-gradient(270deg, #b2ebf2, #e0f7fa, #c5cae9);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      animation: gradientFade 20s ease infinite;
+    }
+
+    #loader h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 28px;
+      color: #007bff;
+      text-shadow: 0 0 10px rgba(0, 172, 193, 0.7);
+      margin-top: 20px;
+    }
+
+    .moon-animation {
+      width: 80px;
+      height: 80px;
+      animation: rotateMoon 4s linear infinite;
+      filter: drop-shadow(0 0 10px rgba(0, 172, 193, 0.8));
+    }
+
+    @keyframes rotateMoon {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .ghost-cursor {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #00ffff, #00bcd4, transparent);
+      pointer-events: none;
+      z-index: 9999;
+      box-shadow: 0 0 15px rgba(0, 255, 255, 0.6);
+      transform: translate(-50%, -50%);
+      transition: transform 0.05s ease-out;
+      mix-blend-mode: screen;
+    }
+
+    @media (hover: none), (pointer: coarse) {
+      .ghost-cursor {
+        display: none;
+      }
+      body {
+        cursor: default !important;
+      }
+    }
+
+    #developer-link {
+      position: fixed;
+      bottom: 10px;
+      width: 100%;
+      text-align: center;
+      z-index: 10;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    #developer-link a {
+      color: #00bcd4;
+      background: rgba(255, 255, 255, 0.08);
+      padding: 6px 14px;
+      border-radius: 20px;
+      text-decoration: none;
+      font-size: 14px;
+      box-shadow: 0 0 8px rgba(0, 172, 193, 0.3);
+      transition: 0.3s ease;
+    }
+
+    #developer-link a:hover {
+      background: rgba(0, 188, 212, 0.2);
+      color: #ffffff;
+      box-shadow: 0 0 12px rgba(0, 255, 255, 0.5);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Loader -->
+  <div id="loader">
+    <svg class="moon-animation" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="#00bcd4">
+      <circle cx="32" cy="32" r="20" />
+      <circle cx="25" cy="25" r="3" fill="#b2ebf2"/>
+      <circle cx="40" cy="30" r="2.5" fill="#b2ebf2"/>
+      <circle cx="35" cy="40" r="2" fill="#b2ebf2"/>
+    </svg>
+    <h1>Moon is waking up...</h1>
+  </div>
+
+  <!-- Chat UI -->
+  <div id="chatbox">
+    <div id="title">MoonBiplov</div>
+    <div id="chatlog">
+      <iframe src="https://www.blackbox.ai/agent/MoonMbKGFko" title="Moon AI Chat"></iframe>
+    </div>
+  </div>
+
+  <!-- Flame Cursor -->
+  <div class="ghost-cursor" id="ghostCursor"></div>
+
+  <!-- Developer Credit -->
+  <div id="developer-link">
+    <a href="https://moonbiplov.carrd.co/" target="_blank">Made by MoonBiplov</a>
+  </div>
+
+  <script>
+    // Show chat after loading
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        document.getElementById('loader').style.display = 'none';
+        const chatbox = document.getElementById('chatbox');
+        chatbox.style.display = 'flex';
+        setTimeout(() => chatbox.style.opacity = 1, 50);
+      }, 3000);
+    });
+
+    // Ghost flame cursor (PC only)
+    const cursor = document.getElementById('ghostCursor');
+
+    if (!('ontouchstart' in window)) {
+      document.addEventListener('mousemove', e => {
+        cursor.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
+      });
+    }
+  </script>
+
+</body>
+</html>
